@@ -1,0 +1,48 @@
+name: TransmissionBar bug
+description: Report a problem with the TransmissionBar menu bar app
+title: '[TransmissionBar] '
+body:
+  - type: input
+    id: app-version
+    attributes:
+      label: TransmissionBar version
+      placeholder: '0.7'
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and Mac model
+      placeholder: 'macOS 27.0.1, M1 Mac mini'
+    validations:
+      required: true
+  - type: dropdown
+    id: installation
+    attributes:
+      label: Installation
+      options:
+        - Downloaded release DMG
+        - GitHub Actions artifact
+        - Built from source
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      placeholder: '1. Open the menu bar panel…'
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour and exact error
+      description: Include screenshots or relevant build/engine log excerpts if useful.
+    validations:
+      required: true
