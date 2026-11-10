@@ -45,7 +45,8 @@ def copy_binary(original, destination, inherited=()):
     copied[original] = destination
     shutil.copy2(original, destination)
     destination.chmod(0o755)
-    subprocess.run(['codesign', '--remove-signature', str(destination)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    # Preserve the copied Mach-O layout during relocation. The final forced
+    # ad-hoc signature replaces the original after all load commands are edited.
     search = [expand(p, original.parent) for p in rpaths(original)] + list(inherited)
     deps = [line.strip().split(' (compatibility', 1)[0] for line in run('otool', '-L', str(original)).splitlines()[1:]]
     # A dylib's first entry may be its own install ID.

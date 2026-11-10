@@ -5,6 +5,9 @@ import json
 from pathlib import Path
 import tarfile
 import tempfile
+import subprocess
+import sys
+import shutil
 import unittest
 from unittest.mock import patch
 
@@ -31,6 +34,31 @@ def archive_with_notice(path):
 
 
 class ReleasePackagingTests(unittest.TestCase):
+    @unittest.skipUnless(sys.platform == 'darwin' and shutil.which('clang'), 'requires macOS Mach-O tools')
+    def test_signed_library_remains_portable_after_bundling(self):
+        with tempfile.TemporaryDirectory() as temp:
+            root = Path(temp)
+            original = root / 'original'
+            original.mkdir()
+            library = original / 'libanswer.dylib'
+            executable = original / 'engine-fixture'
+            (original / 'answer.c').write_text('int answer(void) { return 42; }\n')
+            (original / 'main.c').write_text('#include <stdio.h>\nextern int answer(void);\nint main(void) { printf("%d\\n", answer()); return 0; }\n')
+            subprocess.run(['clang', '-dynamiclib', str(original / 'answer.c'), '-install_name', str(library), '-o', str(library)], check=True)
+            subprocess.run(['clang', str(original / 'main.c'), str(library), '-o', str(executable)], check=True)
+            for path in [library, executable]:
+                subprocess.run(['codesign', '--force', '--sign', '-', str(path)], check=True)
+            before = {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in [library, executable]}
+            app = root / 'Fixture.app'
+            subprocess.run([sys.executable, str(SCRIPTS / 'bundle-engine.py'), str(executable), str(app)], check=True)
+            for path in [library, executable]:
+                self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), before[path.name])
+            bundled = app / 'Contents/Helpers/engine-fixture'
+            for path in [bundled, *list((app / 'Contents/Frameworks').iterdir())]:
+                subprocess.run(['codesign', '--verify', '--strict', str(path)], check=True)
+            original.rename(root / 'original-unavailable')
+            self.assertEqual(subprocess.check_output([str(bundled)], text=True).strip(), '42')
+
     def test_notices_are_flattened_and_cannot_escape_output(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
