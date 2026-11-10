@@ -1,11 +1,10 @@
 # TransmissionBar 0.7 public beta
 
-A macOS menu bar interface powered by a bundled Transmission daemon. Open the panel from the menu bar, manage transfers, and close it while downloads and seeding continue.
+A macOS menu bar interface powered by the Transmission engine. Open the panel from the menu bar, manage transfers, and close it while downloads finish and then seed.
 
 ## Included
 
 - Torrent list with a separate inspector for the selected transfer.
-- Multi-selection, Command-A, and right-click transfer actions.
 - Torrent-file, magnet-link and plain v1 hash input.
 - Batch add confirmation with destination, start state and priority; optional one-click defaults.
 - Transfer, queue, bandwidth, schedule, network and application preferences.
